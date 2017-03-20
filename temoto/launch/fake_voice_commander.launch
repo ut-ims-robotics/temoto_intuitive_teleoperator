@@ -1,0 +1,4 @@
+<launch>
+  <node name="keyboard_event_publisher" pkg="keyboard_reader" type="keyboard_event_publisher" output="screen"/>
+  <node name="kb_fake_voice_commander" pkg="temoto" type="kb_fake_voice_commander" output="screen"/>
+</launch>

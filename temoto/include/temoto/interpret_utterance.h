@@ -78,6 +78,7 @@ public:
     {"cancel cartesian", 0x37},		// clears all the cartesian waypoints
     {"manipulation", 0x40},		// operator controls robot manipulator (MoveIt!)
     {"navigation", 0x41},		// operator navigates the robot base (ROS_navigation)
+    {"full", 0x42},			// operator controls the manipiulator and navigates the base at the same time
     
     {"okay robot execute", 0x66}	// demo testing: placeholder command for some subtask
   };

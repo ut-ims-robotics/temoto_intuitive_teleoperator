@@ -135,7 +135,8 @@ private:
   bool position_fwd_only_;		///< TRUE when hand position is restricted to back and forward motion. Is only relevant when position_limited is 'true'.
   bool secondary_hand_before_;		///< Presence of secondary hand during the previous iteration of Leap Motion's callback processLeap(..).
   bool navigate_to_goal_;		///< TRUE: interpret live_pose_ as 2D navigation goal; FALSE: live_pose_ is the motion planning target for robot EEF.
+  bool full_planning_;			///< TRUE: EEF and navigation planning is done simultaneously
   bool primary_hand_is_left_;		///< TRUE unless user specified right hand as the primary hand.
-  uint8_t control_state_;		///< 1 -> manipulate only; 2 -> navigate only; 3 -> manipulate&navigate
+  uint8_t control_state_;		///< 1 -> manipulate only; 2 -> navigate only; 3 -> manipulate&navigate; 4 -> manipulate&navigate in simultaneous planning mode
 };
 #endif

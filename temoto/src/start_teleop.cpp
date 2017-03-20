@@ -48,13 +48,13 @@ Teleoperator::Teleoperator(std::string primary_hand, bool navigate, bool manipul
   position_limited_ = true;
   position_fwd_only_ = false;
   secondary_hand_before_ = false;
-    
-  // Setting up control_state, i.e., whether teleoperator is controlling navigation, manipulation, or both.
+  full_planning_ = false;
+
   if (manipulate && navigate)
   {
     control_state_ = 3;
     navigate_to_goal_ = true;		// if navigation AND manipulation are enable, start out in navigation mode.
-    AMP_HAND_MOTION_ = 100;		// 100 for navigation
+    AMP_HAND_MOTION_ = 10;		// 100 for navigation
   }
   else if (navigate && !manipulate)
   {
@@ -98,9 +98,16 @@ void Teleoperator::callRobotMotionInterface(uint8_t action_type)
   motion.request.action_type = action_type;	// set action_type
 
   // =================================================
+  // === Calling FullPlanningInterface ==========
+  // =================================================
+  if (full_planning_)
+  {
+
+  }
+  // =================================================
   // === Calling NavigateRobotInterface ==============
   // =================================================
-  if (navigate_to_goal_) // if in NAVIGATION mode
+  else if (navigate_to_goal_) // if in NAVIGATION mode
   {
     // If operator requested ABORT
     if (action_type == temoto::GoalRequest::ABORT)
@@ -625,7 +632,11 @@ void Teleoperator::processVoiceCommand(temoto::Command voice_command)
     switch_human2robot_tf.request.navigate = false;	// request a change of control mode
     switch_human2robot_tf.request.first_person_perspective = using_natural_control_;	// preserve current control perspective
     // if service request successful, change the value of control mode in this node
-    if ( tf_change_client_.call( switch_human2robot_tf ) ) navigate_to_goal_ = false;
+    if ( tf_change_client_.call( switch_human2robot_tf ) )
+    {
+        navigate_to_goal_ = false;
+        full_planning_ = false;
+    }
   }
   else if (voice_command.code == 0x41 && control_state_ != 1)	// Switch over to navigation mode
   { 
@@ -635,7 +646,24 @@ void Teleoperator::processVoiceCommand(temoto::Command voice_command)
     switch_human2robot_tf.request.navigate = true;	// request a change of control mode
     switch_human2robot_tf.request.first_person_perspective = using_natural_control_;	// preserve current control perspective
     // if service request successful, change the value of control mode in this node
-    if ( tf_change_client_.call( switch_human2robot_tf ) ) navigate_to_goal_ = true;
+    if ( tf_change_client_.call( switch_human2robot_tf ) )
+    {
+        navigate_to_goal_ = true;
+        full_planning_ = false;
+    }
+  }
+  else if (voice_command.code == 0x42 && control_state_ == 3)	// Switch to simultaneous planning mode
+  {
+      ROS_INFO("Switching to simultaneous planning mode.");
+      AMP_HAND_MOTION_ = 10;
+      temoto::ChangeTf switch_human2robot_tf;
+      switch_human2robot_tf.request.navigate = false;	// request a change of control mode
+      switch_human2robot_tf.request.first_person_perspective = using_natural_control_;	// preserve current control perspective
+      // if service request successful, change the value of control mode in this node
+      if ( tf_change_client_.call( switch_human2robot_tf ) )
+      {
+          full_planning_ = true;
+      }
   }
   else if (voice_command.code == 0x66)			// test command for some subtask
   {
